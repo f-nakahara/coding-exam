@@ -2,6 +2,7 @@ import { Box, Center, Checkbox, Spinner, Text, VStack } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { useTaskController } from "../hooks";
 import { Task } from "../types/task";
+import { DeleteTaskButton } from "./DeleteTaskButton";
 import { UpdateTaskButton } from "./UpdateTaskButton";
 
 export const TaskList = () => {
@@ -66,6 +67,7 @@ export const TaskList = () => {
               </Text>
             </Box>
             <UpdateTaskButton task={task} />
+            <DeleteTaskButton task={task} />
           </Box>
         ))}
       </VStack>
