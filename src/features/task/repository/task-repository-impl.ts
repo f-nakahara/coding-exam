@@ -139,4 +139,38 @@ export class TaskRepositoryImpl implements TaskRepository {
       throw appError;
     }
   }
+
+  async remove(id: number): Promise<void> {
+    try {
+      const response = await axios.delete(`${Config.apiHost}/todos/${id}`);
+
+      if (response.status === 200) {
+        Logger.debug(`タスクが削除されました: ID ${id}`);
+      } else {
+        throw new AppError(`予期しないステータスコード: ${response.status}`);
+      }
+    } catch (error) {
+      let appError: AppError;
+
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response) {
+          appError = new AppError(
+            `タスクの削除中にエラーが発生しました。ステータスコード: ${axiosError.response.status}`
+          );
+        } else {
+          appError = new AppError(
+            "タスクの削除中にネットワークエラーが発生しました。"
+          );
+        }
+      } else {
+        appError = new UnknownError(
+          "タスクの削除中に予期しないエラーが発生しました。"
+        );
+      }
+
+      Logger.error(appError);
+      throw appError;
+    }
+  }
 }

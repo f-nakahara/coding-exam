@@ -33,6 +33,7 @@ export const useTaskController = (
   fetchTasks: () => Promise<void>;
   addTask: (title: string) => Promise<void>;
   updateTask: (id: number, title: string, completed: boolean) => Promise<void>;
+  removeTask: (id: number) => Promise<void>;
 } => {
   const [, setTasks] = useAtom(tasksAtom);
   const [tasks] = useAtom(loadableTasksAtom);
@@ -100,10 +101,25 @@ export const useTaskController = (
     }
   };
 
+  /**
+   * タスクを削除する
+   * @param {number} id - 削除するタスクのID
+   * @returns {Promise<void>}
+   */
+  const removeTask = async (id: number): Promise<void> => {
+    try {
+      await taskRepository.remove(id);
+      await fetchTasks();
+    } catch (e) {
+      Logger.error(e);
+    }
+  };
+
   return {
     tasks,
     fetchTasks,
     addTask,
     updateTask,
+    removeTask,
   };
 };

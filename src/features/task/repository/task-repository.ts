@@ -25,4 +25,11 @@ export interface TaskRepository {
    * @returns {Promise<Task>} 更新されたタスクを含むPromise
    */
   update(id: number, title: string, completed: boolean): Promise<Task>;
+
+  /**
+   * タスクを削除する
+   * @param {number} id - 削除するタスクのID
+   * @returns {Promise<void>} 削除されたタスクを含むPromise
+   */
+  remove(id: number): Promise<void>;
 }
