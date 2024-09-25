@@ -1,4 +1,5 @@
-import { AppError, UnknownError } from "@/core/errors/errors";
+import { AppError, UnknownError, ValidationError } from "@/core/errors/errors";
+import { Config } from "@/core/util/config";
 import { Logger } from "@/core/util/logger";
 import axios, { Axios, AxiosError } from "axios";
 import { Task } from "../types/task";
@@ -40,6 +41,51 @@ export class TaskRepositoryImpl implements TaskRepository {
       } else {
         appError = new UnknownError(
           "タスクの取得中に予期しないエラーが発生しました。"
+        );
+      }
+
+      Logger.error(appError);
+      throw appError;
+    }
+  }
+
+  async add(title: string): Promise<Task> {
+    try {
+      const body = {
+        title,
+      };
+      const response = await axios.post(`${Config.apiHost}/todos`, body);
+
+      if (response.status === 200) {
+        const newTask: Task = response.data;
+        Logger.debug(newTask);
+        return newTask;
+      } else {
+        throw new AppError(`予期しないステータスコード: ${response.status}`);
+      }
+    } catch (error) {
+      let appError: AppError;
+
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response) {
+          if (axiosError.response.status === 400) {
+            appError = new ValidationError(
+              "タスクの追加に失敗しました。入力データが不正です。"
+            );
+          } else {
+            appError = new AppError(
+              `タスクの追加中にエラーが発生しました。ステータスコード: ${axiosError.response.status}`
+            );
+          }
+        } else {
+          appError = new AppError(
+            "タスクの追加中にネットワークエラーが発生しました。"
+          );
+        }
+      } else {
+        appError = new UnknownError(
+          "タスクの追加中に予期しないエラーが発生しました。"
         );
       }
 
