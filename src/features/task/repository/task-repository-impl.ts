@@ -21,9 +21,8 @@ export class TaskRepositoryImpl implements TaskRepository {
 				const tasks: Task[] = response.data;
 				Logger.debug(tasks);
 				return tasks;
-			} else {
-				throw new AppError(`予期しないステータスコード: ${response.status}`);
 			}
+			throw new AppError(`予期しないステータスコード: ${response.status}`);
 		} catch (error) {
 			let appError: AppError;
 
@@ -60,9 +59,8 @@ export class TaskRepositoryImpl implements TaskRepository {
 				const newTask: Task = response.data;
 				Logger.debug(newTask);
 				return newTask;
-			} else {
-				throw new AppError(`予期しないステータスコード: ${response.status}`);
 			}
+			throw new AppError(`予期しないステータスコード: ${response.status}`);
 		} catch (error) {
 			let appError: AppError;
 
@@ -106,9 +104,8 @@ export class TaskRepositoryImpl implements TaskRepository {
 				const updatedTask: Task = response.data;
 				Logger.debug(updatedTask);
 				return updatedTask;
-			} else {
-				throw new AppError(`予期しないステータスコード: ${response.status}`);
 			}
+			throw new AppError(`予期しないステータスコード: ${response.status}`);
 		} catch (error) {
 			let appError: AppError;
 
@@ -145,7 +142,7 @@ export class TaskRepositoryImpl implements TaskRepository {
 			const response = await axios.delete(`${Config.apiHost}/todos/${id}`);
 
 			if (response.status === 200) {
-				Logger.debug(`タスクが削除されました: ID ${id}`);
+				Logger.debug({ message: `タスクが削除されました: ID ${id}` });
 			} else {
 				throw new AppError(`予期しないステータスコード: ${response.status}`);
 			}

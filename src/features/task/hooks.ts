@@ -49,7 +49,6 @@ export const useTaskController = (
 	 */
 	const fetchTasks = async () => {
 		try {
-			Logger.debug("fetchTasks");
 			const tasks = await taskRepository.findAll();
 			setTasks(tasks);
 		} catch (e) {
@@ -97,7 +96,8 @@ export const useTaskController = (
 			await taskRepository.update(id, title, completed);
 			await fetchTasks();
 		} catch (e) {
-			Logger.error(e);
+			const error = e as Error;
+			Logger.error(error);
 		}
 	};
 

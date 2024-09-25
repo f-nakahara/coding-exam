@@ -1,4 +1,5 @@
 import { Box, Center, Checkbox, Spinner, Text, VStack } from "@chakra-ui/react";
+import { useAtomValue } from "jotai";
 import { useEffect } from "react";
 import { useTaskController } from "../hooks";
 import type { Task } from "../types/task";
@@ -8,6 +9,7 @@ import { UpdateTaskButton } from "./UpdateTaskButton";
 export const TaskList = () => {
 	const { tasks, fetchTasks, updateTask } = useTaskController();
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
 	useEffect(() => {
 		fetchTasks();
 	}, []);
