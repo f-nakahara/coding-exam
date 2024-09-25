@@ -32,6 +32,7 @@ export const useTaskController = (
   tasks: Loadable<Task[]>;
   fetchTasks: () => Promise<void>;
   addTask: (title: string) => Promise<void>;
+  updateTask: (id: number, title: string, completed: boolean) => Promise<void>;
 } => {
   const [, setTasks] = useAtom(tasksAtom);
   const [tasks] = useAtom(loadableTasksAtom);
@@ -79,9 +80,30 @@ export const useTaskController = (
     }
   };
 
+  /**
+   * タスクを更新する
+   * @param {number} id - 更新するタスクのID
+   * @param {string} title - 更新後のタスクのタイトル
+   * @param {boolean} completed - タスクの完了状態
+   * @returns {Promise<void>}
+   */
+  const updateTask = async (
+    id: number,
+    title: string,
+    completed: boolean
+  ): Promise<void> => {
+    try {
+      await taskRepository.update(id, title, completed);
+      await fetchTasks();
+    } catch (e) {
+      Logger.error(e);
+    }
+  };
+
   return {
     tasks,
     fetchTasks,
     addTask,
+    updateTask,
   };
 };

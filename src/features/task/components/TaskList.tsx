@@ -2,9 +2,10 @@ import { Box, Center, Checkbox, Spinner, Text, VStack } from "@chakra-ui/react";
 import { useEffect } from "react";
 import { useTaskController } from "../hooks";
 import { Task } from "../types/task";
+import { UpdateTaskButton } from "./UpdateTaskButton";
 
 export const TaskList = () => {
-  const { tasks, fetchTasks } = useTaskController();
+  const { tasks, fetchTasks, updateTask } = useTaskController();
 
   useEffect(() => {
     fetchTasks();
@@ -45,8 +46,17 @@ export const TaskList = () => {
             borderRadius="md"
             display="flex"
             alignItems="center"
+            onClick={async () =>
+              await updateTask(task.id, task.title, !task.completed)
+            }
           >
-            <Checkbox isChecked={task.completed} mr={3} />
+            <Checkbox
+              isChecked={task.completed}
+              onChange={async () =>
+                await updateTask(task.id, task.title, !task.completed)
+              }
+              mr={3}
+            />
             <Box flex="1">
               <Text fontSize="sm" color="gray.500">
                 ID: {task.id}
@@ -55,6 +65,7 @@ export const TaskList = () => {
                 {task.title}
               </Text>
             </Box>
+            <UpdateTaskButton task={task} />
           </Box>
         ))}
       </VStack>
