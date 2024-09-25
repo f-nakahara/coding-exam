@@ -93,4 +93,50 @@ export class TaskRepositoryImpl implements TaskRepository {
       throw appError;
     }
   }
+
+  async update(id: number, title: string, completed: boolean): Promise<Task> {
+    try {
+      const body = {
+        title,
+        completed,
+      };
+      const response = await axios.put(`${Config.apiHost}/todos/${id}`, body);
+
+      if (response.status === 200) {
+        const updatedTask: Task = response.data;
+        Logger.debug(updatedTask);
+        return updatedTask;
+      } else {
+        throw new AppError(`予期しないステータスコード: ${response.status}`);
+      }
+    } catch (error) {
+      let appError: AppError;
+
+      if (axios.isAxiosError(error)) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response) {
+          if (axiosError.response.status === 400) {
+            appError = new ValidationError(
+              "タスクの更新に失敗しました。入力データが不正です。"
+            );
+          } else {
+            appError = new AppError(
+              `タスクの更新中にエラーが発生しました。ステータスコード: ${axiosError.response.status}`
+            );
+          }
+        } else {
+          appError = new AppError(
+            "タスクの更新中にネットワークエラーが発生しました。"
+          );
+        }
+      } else {
+        appError = new UnknownError(
+          "タスクの更新中に予期しないエラーが発生しました。"
+        );
+      }
+
+      Logger.error(appError);
+      throw appError;
+    }
+  }
 }
