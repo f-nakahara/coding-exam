@@ -31,6 +31,7 @@ export const useTaskController = (
 ): {
   tasks: Loadable<Task[]>;
   fetchTasks: () => Promise<void>;
+  addTask: (title: string) => Promise<void>;
 } => {
   const [, setTasks] = useAtom(tasksAtom);
   const [tasks] = useAtom(loadableTasksAtom);
@@ -55,8 +56,32 @@ export const useTaskController = (
     }
   };
 
+  /**
+   * 新しいタスクを追加し、タスクリストの状態を更新する非同期関数です。
+   *
+   * @param {string} title - 追加するタスクのタイトル
+   * @returns {Promise<void>}
+   *
+   * この関数は以下の手順で動作します：
+   * 1. 指定されたタイトルで新しいタスクを追加するAPIを呼び出します。
+   * 2. APIコールが成功した場合、新しいタスクを既存のタスクリストに追加します。
+   * 3. タスクリストの現在の状態に応じて、適切に状態を更新します。
+   * 4. エラーが発生した場合、エラーをログに記録し、タスクリストを空にリセットします。
+   *
+   * 注意：この関数はtry-catch文を使用してエラーハンドリングを行います。
+   */
+  const addTask = async (title: string): Promise<void> => {
+    try {
+      await taskRepository.add(title);
+      await fetchTasks();
+    } catch (e) {
+      Logger.error(e);
+    }
+  };
+
   return {
     tasks,
     fetchTasks,
+    addTask,
   };
 };
