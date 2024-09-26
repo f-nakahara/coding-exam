@@ -27,3 +27,13 @@ export class UnknownError extends AppError {
 		this.name = "UnknownError";
 	}
 }
+
+/**
+ * リソースが見つからないエラー
+ */
+export class NotFoundError extends AppError {
+	constructor(message = "リソースが見つかりません") {
+		super(message);
+		this.name = "NotFoundError";
+	}
+}

@@ -1,7 +1,11 @@
-import { AppError, UnknownError, ValidationError } from "@/core/errors/errors";
-import { Config } from "@/core/util/config";
+import {
+	AppError,
+	NotFoundError,
+	UnknownError,
+	ValidationError,
+} from "@/core/errors/errors";
 import { Logger } from "@/core/util/logger";
-import axios, { type Axios, type AxiosError } from "axios";
+import { type Axios, AxiosError } from "axios";
 import type { Task } from "../types/task";
 import type { TaskRepository } from "./task-repository";
 
@@ -26,12 +30,17 @@ export class TaskRepositoryImpl implements TaskRepository {
 		} catch (error) {
 			let appError: AppError;
 
-			if (axios.isAxiosError(error)) {
+			if (error instanceof AxiosError) {
 				const axiosError = error as AxiosError;
 				if (axiosError.response) {
-					appError = new AppError(
-						`タスクの取得中にエラーが発生しました。ステータスコード: ${axiosError.response.status}`,
-					);
+					const status = axiosError.response.status;
+					switch (status) {
+						default:
+							appError = new UnknownError(
+								"タスクの取得中に予期しないエラーが発生しました。",
+							);
+							break;
+					}
 				} else {
 					appError = new AppError(
 						"タスクの取得中にネットワークエラーが発生しました。",
@@ -53,9 +62,9 @@ export class TaskRepositoryImpl implements TaskRepository {
 			const body = {
 				title,
 			};
-			const response = await axios.post(`${Config.apiHost}/todos`, body);
+			const response = await this.apiClient.post("/todos", body);
 
-			if (response.status === 200) {
+			if (response.status === 201) {
 				const newTask: Task = response.data;
 				Logger.debug(newTask);
 				return newTask;
@@ -64,17 +73,21 @@ export class TaskRepositoryImpl implements TaskRepository {
 		} catch (error) {
 			let appError: AppError;
 
-			if (axios.isAxiosError(error)) {
+			if (error instanceof AxiosError) {
 				const axiosError = error as AxiosError;
 				if (axiosError.response) {
-					if (axiosError.response.status === 400) {
-						appError = new ValidationError(
-							"タスクの追加に失敗しました。入力データが不正です。",
-						);
-					} else {
-						appError = new AppError(
-							`タスクの追加中にエラーが発生しました。ステータスコード: ${axiosError.response.status}`,
-						);
+					const status = axiosError.response.status;
+					switch (status) {
+						case 400:
+							appError = new ValidationError(
+								"タスクの追加に失敗しました。入力データが不正です。",
+							);
+							break;
+						default:
+							appError = new UnknownError(
+								"タスクの取得中に予期しないエラーが発生しました。",
+							);
+							break;
 					}
 				} else {
 					appError = new AppError(
@@ -98,7 +111,7 @@ export class TaskRepositoryImpl implements TaskRepository {
 				title,
 				completed,
 			};
-			const response = await axios.put(`${Config.apiHost}/todos/${id}`, body);
+			const response = await this.apiClient.put(`/todos/${id}`, body);
 
 			if (response.status === 200) {
 				const updatedTask: Task = response.data;
@@ -109,17 +122,26 @@ export class TaskRepositoryImpl implements TaskRepository {
 		} catch (error) {
 			let appError: AppError;
 
-			if (axios.isAxiosError(error)) {
+			if (error instanceof AxiosError) {
 				const axiosError = error as AxiosError;
 				if (axiosError.response) {
-					if (axiosError.response.status === 400) {
-						appError = new ValidationError(
-							"タスクの更新に失敗しました。入力データが不正です。",
-						);
-					} else {
-						appError = new AppError(
-							`タスクの更新中にエラーが発生しました。ステータスコード: ${axiosError.response.status}`,
-						);
+					const status = axiosError.response.status;
+					switch (status) {
+						case 400:
+							appError = new ValidationError(
+								"タスクの更新に失敗しました。入力データが不正です。",
+							);
+							break;
+						case 404:
+							appError = new NotFoundError(
+								"タスクの更新に失敗しました。タスクが見つかりません。",
+							);
+							break;
+						default:
+							appError = new UnknownError(
+								"タスクの取得中に予期しないエラーが発生しました。",
+							);
+							break;
 					}
 				} else {
 					appError = new AppError(
@@ -139,7 +161,7 @@ export class TaskRepositoryImpl implements TaskRepository {
 
 	async remove(id: number): Promise<void> {
 		try {
-			const response = await axios.delete(`${Config.apiHost}/todos/${id}`);
+			const response = await this.apiClient.delete(`/todos/${id}`);
 
 			if (response.status === 200) {
 				Logger.debug({ message: `タスクが削除されました: ID ${id}` });
@@ -149,12 +171,27 @@ export class TaskRepositoryImpl implements TaskRepository {
 		} catch (error) {
 			let appError: AppError;
 
-			if (axios.isAxiosError(error)) {
+			if (error instanceof AxiosError) {
 				const axiosError = error as AxiosError;
 				if (axiosError.response) {
-					appError = new AppError(
-						`タスクの削除中にエラーが発生しました。ステータスコード: ${axiosError.response.status}`,
-					);
+					const status = axiosError.response.status;
+					switch (status) {
+						case 400:
+							appError = new ValidationError(
+								"タスクの削除に失敗しました。入力データが不正です。",
+							);
+							break;
+						case 404:
+							appError = new NotFoundError(
+								"タスクの削除に失敗しました。タスクが見つかりません。",
+							);
+							break;
+						default:
+							appError = new UnknownError(
+								"タスクの取得中に予期しないエラーが発生しました。",
+							);
+							break;
+					}
 				} else {
 					appError = new AppError(
 						"タスクの削除中にネットワークエラーが発生しました。",

@@ -34,7 +34,6 @@ export const AddTaskButton = () => {
 		setIsLoading(true);
 		try {
 			await addTask(taskTitle);
-			await fetchTasks();
 			toast({
 				title: "タスクが追加されました",
 				status: "success",

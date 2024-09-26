@@ -3,6 +3,7 @@ import { Logger } from "@/core/util/logger";
 import { atom, useAtom } from "jotai";
 import { loadable } from "jotai/utils";
 import type { Loadable } from "jotai/vanilla/utils/loadable";
+import { useEffect } from "react";
 import type { TaskRepository } from "./repository/task-repository";
 import type { Task } from "./types/task";
 
@@ -37,6 +38,10 @@ export const useTaskController = (
 } => {
 	const [, setTasks] = useAtom(tasksAtom);
 	const [tasks] = useAtom(loadableTasksAtom);
+
+	useEffect(() => {
+		fetchTasks();
+	}, []);
 
 	/**
 	 * タスクを非同期で取得し、状態を更新します。
