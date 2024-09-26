@@ -1,4 +1,5 @@
-import { Button, useToast } from "@chakra-ui/react";
+import { useAppToast } from "@/core/components/AppToast";
+import { Button } from "@chakra-ui/react";
 import { useState } from "react";
 import { useTaskController } from "../hooks";
 import type { Task } from "../types/task";
@@ -6,24 +7,18 @@ import type { Task } from "../types/task";
 export const DeleteTaskButton = ({ task }: { task: Task }) => {
 	const { removeTask } = useTaskController();
 	const [isLoading, setIsLoading] = useState(false);
-	const toast = useToast();
+	const { showSuccessToast, showErrorToast } = useAppToast();
 
 	const handleDeleteTask = async () => {
 		setIsLoading(true);
 		try {
 			await removeTask(task.id);
-			toast({
+			showSuccessToast({
 				title: "タスクが削除されました",
-				status: "success",
-				duration: 3000,
-				isClosable: true,
 			});
 		} catch (e) {
-			toast({
+			showErrorToast({
 				title: "タスクの削除に失敗しました",
-				status: "error",
-				duration: 3000,
-				isClosable: true,
 			});
 		} finally {
 			setIsLoading(false);

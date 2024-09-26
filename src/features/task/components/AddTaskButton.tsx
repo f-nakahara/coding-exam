@@ -1,3 +1,4 @@
+import { useAppToast } from "@/core/components/AppToast";
 import {
 	Button,
 	Input,
@@ -9,18 +10,18 @@ import {
 	ModalHeader,
 	ModalOverlay,
 	Text,
-	useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useTaskController } from "../hooks";
 
 export const AddTaskButton = () => {
-	const { addTask, fetchTasks } = useTaskController();
+	const { addTask } = useTaskController();
 	const [isOpen, setIsOpen] = useState(false);
 	const [taskTitle, setTaskTitle] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const toast = useToast();
+	const [titleError, setTitleError] = useState<string | null>(null);
+	const { showSuccessToast, showErrorToast } = useAppToast();
 
 	const handleOpen = () => setIsOpen(true);
 	const handleClose = () => {
@@ -34,18 +35,25 @@ export const AddTaskButton = () => {
 		setIsLoading(true);
 		try {
 			await addTask(taskTitle);
-			toast({
+			showSuccessToast({
 				title: "タスクが追加されました",
-				status: "success",
-				duration: 3000,
-				isClosable: true,
 			});
 			handleClose();
 		} catch (e) {
 			setError("タスクの追加に失敗しました。");
+			showErrorToast({
+				title: "エラー",
+				description: "タスクの追加に失敗しました。",
+			});
 		} finally {
 			setIsLoading(false);
 		}
+	};
+
+	const validateTaskTitle = (title: string): string | null => {
+		if (!title) return "タイトルは必須です。";
+		if (title.length > 20) return "タイトルは20文字以内で入力してください。";
+		return null;
 	};
 
 	return (
@@ -60,9 +68,12 @@ export const AddTaskButton = () => {
 						<Input
 							placeholder="タスクのタイトルを入力"
 							value={taskTitle}
-							onChange={(e) => setTaskTitle(e.target.value)}
+							onChange={(e) => {
+								setTaskTitle(e.target.value);
+								setTitleError(validateTaskTitle(e.target.value));
+							}}
 						/>
-						{error && <Text color="red.500">{error}</Text>}
+						{titleError && <Text color="red.500">{titleError}</Text>}
 					</ModalBody>
 					<ModalFooter>
 						<Button
@@ -70,7 +81,7 @@ export const AddTaskButton = () => {
 							mr={3}
 							onClick={handleAddTask}
 							isLoading={isLoading}
-							isDisabled={!taskTitle}
+							isDisabled={!!titleError}
 						>
 							作成
 						</Button>

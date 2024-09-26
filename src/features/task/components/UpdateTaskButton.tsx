@@ -1,3 +1,4 @@
+import { useAppToast } from "@/core/components/AppToast";
 import {
 	Button,
 	Input,
@@ -9,7 +10,6 @@ import {
 	ModalHeader,
 	ModalOverlay,
 	Text,
-	useToast,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useTaskController } from "../hooks";
@@ -21,7 +21,7 @@ export const UpdateTaskButton = ({ task }: { task: Task }) => {
 	const [taskTitle, setTaskTitle] = useState(task.title);
 	const [isLoading, setIsLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
-	const toast = useToast();
+	const { showSuccessToast, showErrorToast } = useAppToast();
 
 	const handleOpen = () => setIsOpen(true);
 	const handleClose = () => {
@@ -35,15 +35,16 @@ export const UpdateTaskButton = ({ task }: { task: Task }) => {
 		try {
 			await updateTask(task.id, taskTitle, task.completed);
 			await fetchTasks();
-			toast({
+			showSuccessToast({
 				title: "タスクが更新されました",
-				status: "success",
-				duration: 3000,
-				isClosable: true,
 			});
 			handleClose();
 		} catch (e) {
 			setError("タスクの更新に失敗しました。");
+			showErrorToast({
+				title: "エラー",
+				description: "タスクの更新に失敗しました。",
+			});
 		} finally {
 			setIsLoading(false);
 		}
